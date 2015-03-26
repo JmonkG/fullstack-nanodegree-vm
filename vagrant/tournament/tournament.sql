@@ -13,7 +13,9 @@ CREATE TABLE Players(PlayerID SERIAL PRIMARY KEY,FirstName varchar(255),Wins int
 CREATE TABLE Matches( MatchID SERIAL PRIMARY KEY, Winner int,Loser int);
 
 CREATE VIEW number_players AS SELECT COUNT(*) FROM Players;
-CREATE VIEW list_players AS SELECT PlayerID,FirstName,Wins from Players order by Wins ASC;
+
+
+CREATE VIEW player_standings AS SELECT PlayerID,FirstName,Wins,Matches from Players order by Wins DESC;
 
 CREATE FUNCTION delete_Players() RETURNS void  AS $$DELETE FROM Players;$$ LANGUAGE SQL;
 
