@@ -5,12 +5,15 @@
 --
 -- You can write comments in this file by starting them with two dashes, like
 -- these lines here.
-
 CREATE DATABASE  tournament;
 
+\c tournament;
+
+BEGIN;
+    
 CREATE TABLE Players(PlayerID SERIAL PRIMARY KEY,FirstName varchar(255),Wins int,Matches int);
 
-CREATE TABLE Matches( MatchID SERIAL PRIMARY KEY, Winner int,Loser int);
+CREATE TABLE Matches( MatchID SERIAL PRIMARY KEY, Winner int references Players(PlayerID),Loser int references Players(PlayerID));
 
 CREATE VIEW number_players AS SELECT COUNT(*) FROM Players;
 
@@ -28,9 +31,10 @@ CREATE FUNCTION return_Players(out id int,out name varchar(30),out win int,out l
 SELECT * from Players ORDER BY Wins DESC;
 $$ LANGUAGE SQL;
 
-
 CREATE FUNCTION report_match(in winner int,in loser int) RETURNS VOID AS $$
 INSERT INTO Matches(Winner,Loser) VALUES (Winner,Loser);
 UPDATE Players set Wins = Wins + 1 WHERE PlayerID = Winner;
 UPDATE Players set Matches = Matches + 1 WHERE PlayerID = Winner OR PlayerID = Loser;
 $$ LANGUAGE SQL;
+
+END;
