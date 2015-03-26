@@ -19,7 +19,11 @@ def registerPlayer(name):
     Args:
       name: the player's full name (need not be unique).
     """ 
-    connection = connect();
-    connection.execute("SELECT insert_Players('%s');",(name,))
+    conn = psycopg2.connect("dbname='tournament'")
+    cur = conn.cursor()
+    cur.execute("SELECT insert_Players(%s)",(name,))
+    cur.execute("SELECT * FROM Players;")
+    lis =  cur.fetchall()
+    print lis
 
-
+registerPlayer('Mariloli')
