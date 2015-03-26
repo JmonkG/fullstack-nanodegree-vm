@@ -5,34 +5,52 @@
 
 import psycopg2
 
-
 def connect():
     """Connect to the PostgreSQL database.  Returns a database connection."""
     return psycopg2.connect("dbname='tournament'")
 
+def registerPlayer(name):
+    """Adds a player to the tournament database.
+    The database assigns a unique serial id number for the player.  (This
+    should be handled by your SQL database schema, not in your Python code.)
+    Args:
+      name: the player's full name (need not be unique).
+    """ 
+    conectdb = connect()
+    cursor = conectdb.cursor()
+    cursor.execute("SELECT insert_Players(%s)",(name,))
+    conectdb.commit()
+    cursor.close()
+    conectdb.close()
 
 def deleteMatches():
-    
     """Remove all the match records from the database."""
-    
+    conectdb = connect()
+    cursor = conectdb.cursor()
+    cursor.execute("SELECT delete_Matches();")
+    conectdb.commit()
+    cursor.close()
+    conectdb.close()
 
 def deletePlayers():
     """Remove all the player records from the database."""
-
+    conectdb = connect()
+    cursor = conectdb.cursor()
+    cursor.execute("SELECT delete_Players();")
+    conectdb.commit()
+    cursor.close()
+    conectdb.close()
 
 def countPlayers():
     """Returns the number of players currently registered."""
-
-
-def registerPlayer(name):
-    """Adds a player to the tournament database.
-  
-    The database assigns a unique serial id number for the player.  (This
-    should be handled by your SQL database schema, not in your Python code.)
-  
-    Args:
-      name: the player's full name (need not be unique).
-    """
+    conectdb = connect()
+    cursor = conectdb.cursor()
+    cursor.execute("SELECT * FROM number_players;")
+    number_players = cursor.fetchone()
+    conectdb.commit()
+    cursor.close()
+    conectdb.close()
+    return number_players[0]
 
 
 def playerStandings():
@@ -48,7 +66,15 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-
+    conectdb = connect()
+    cursor = conectdb.cursor()
+    cursor.execute("SELECT * from player_standings;")
+    list_player = cursor.fetchall()
+    conectdb.commit()
+    cursor.close()
+    conectdb.close()
+    return list_player
+    
 
 def reportMatch(winner, loser):
     """Records the outcome of a single match between two players.
@@ -57,11 +83,18 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
+    conectdb = connect()
+    cursor = conectdb.cursor()
+    cursor.execute("SELECT report_match(%s,%s)",(winner,loser))
+    conectdb.commit()
+    cursor.close()
+    conectdb.close()  
  
  
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
   
+    tup =()
     Assuming that there are an even number of players registered, each player
     appears exactly once in the pairings.  Each player is paired with another
     player with an equal or nearly-equal win record, that is, a player adjacent
@@ -74,5 +107,17 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
-
-
+    finalist = []
+    conectdb = connect()
+    cursor = conectdb.cursor()
+    cursor.execute("SELECT * from swiss_pairs;")
+    conectdb.commit()
+    swiss_pairs = cursor.fetchall()  
+    cursor.close()
+    conectdb.close()
+    while(len(swiss_pairs) != 0):
+        a = swiss_pairs.pop()
+        b = swiss_pairs.pop()
+        tup = (a[0],a[1],b[0],b[1])
+        finalist.append(tup)
+    return finalist;

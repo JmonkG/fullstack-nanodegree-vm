@@ -14,8 +14,9 @@ CREATE TABLE Matches( MatchID SERIAL PRIMARY KEY, Winner int,Loser int);
 
 CREATE VIEW number_players AS SELECT COUNT(*) FROM Players;
 
-
 CREATE VIEW player_standings AS SELECT PlayerID,FirstName,Wins,Matches from Players order by Wins DESC;
+
+CREATE VIEW swiss_pairs AS SELECT PlayerID,FirstName from Players order by Wins ASC;
 
 CREATE FUNCTION delete_Players() RETURNS void  AS $$DELETE FROM Players;$$ LANGUAGE SQL;
 
