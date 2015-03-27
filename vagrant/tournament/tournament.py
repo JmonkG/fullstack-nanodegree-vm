@@ -5,6 +5,7 @@
 
 import psycopg2
 
+
 def connect():
     """Connect to the PostgreSQL database.  Returns a database connection."""
     return psycopg2.connect("dbname=tournament")
@@ -17,9 +18,11 @@ def registerPlayer(name):
       name: the player's full name (need not be unique).
     """ 
     conectdb = connect()
-    cursor = conectdb.cursor()
-    cursor.execute("SELECT insert_Players(%s)",(name,))
-    conectdb.commit()
+    cursor = conectdb.cursor()  # set a cursor in the connection
+    cursor.execute("SELECT insert_Players(%s)",(name,)) #execute the SQL function insert Players(name). This avoids revealing SQL code of the database
+    conectdb.commit() # commits the transaction
+    
+    # good practice to close the cursor and database conection
     cursor.close()
     conectdb.close()
 
@@ -27,7 +30,7 @@ def deleteMatches():
     """Remove all the match records from the database."""
     conectdb = connect()
     cursor = conectdb.cursor()
-    cursor.execute("SELECT delete_Matches();")
+    cursor.execute("SELECT delete_Matches();") # uses the SQL function delete_Matches()
     conectdb.commit()
     cursor.close()
     conectdb.close()
@@ -36,7 +39,7 @@ def deletePlayers():
     """Remove all the player records from the database."""
     conectdb = connect()
     cursor = conectdb.cursor()
-    cursor.execute("SELECT delete_Players();")
+    cursor.execute("SELECT delete_Players();") # uses the SQL function delete_Players()
     conectdb.commit()
     cursor.close()
     conectdb.close()
@@ -45,12 +48,11 @@ def countPlayers():
     """Returns the number of players currently registered."""
     conectdb = connect()
     cursor = conectdb.cursor()
-    cursor.execute("SELECT * FROM number_players;")
-    number_players = cursor.fetchone()
-    conectdb.commit()
+    cursor.execute("SELECT * FROM number_players;") #uses the SQL view number_players, wich retrieves the number of rows in Players
+    number_players = cursor.fetchone() # number_players saves the fetching of the cursor, in this case, just one row
     cursor.close()
     conectdb.close()
-    return number_players[0]
+    return number_players[0] #from the tuple retrieved, takes its firs value, the integer that represents the count of players
 
 
 def playerStandings():
@@ -68,24 +70,28 @@ def playerStandings():
     """
     conectdb = connect()
     cursor = conectdb.cursor()
-    cursor.execute("SELECT * from player_standings;")
-    list_player = cursor.fetchall()
-    conectdb.commit()
+    cursor.execute("SELECT * from player_standings;") # uses the SQL view player_standings
+    list_player = cursor.fetchall() #retrieves all the rows in players order by wins
     cursor.close()
     conectdb.close()
     return list_player
     
 
-def reportMatch(winner, loser):
+def reportMatch(player1, player2,tie): 
     """Records the outcome of a single match between two players.
 
     Args:
-      winner:  the id number of the player who won
-      loser:  the id number of the player who lost
+      player1:  the id number of the player1
+      player2:  the id number of the player2
+      tie:      a boolean variable that determines if the match has a winner or is a tie.
+                if tie is 0 then there is a winner, in this case is player 1, if tie is 1 then is a tie and nobody wins
     """
     conectdb = connect()
     cursor = conectdb.cursor()
-    cursor.execute("SELECT report_match(%s,%s)",(winner,loser))
+    if tie == 0:
+        cursor.execute("SELECT report_match(%s,%s)",(player1,player2)) # uses the SQL function report_match to insert a new match on Matches
+    else:
+        cursor.execute("SELECT report_match_tie(%s,%s)",(player1,player2)) 
     conectdb.commit()
     cursor.close()
     conectdb.close()  
@@ -107,17 +113,16 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
-    finalist = []
+    final_list_players = [] # the final list of tuples in the desired format
     conectdb = connect()
     cursor = conectdb.cursor()
-    cursor.execute("SELECT * from swiss_pairs;")
-    conectdb.commit()
+    cursor.execute("SELECT * from swiss_pairs;") # uses the SQL view 
     swiss_pairs = cursor.fetchall()  
     cursor.close()
     conectdb.close()
     while(len(swiss_pairs) != 0):
-        a = swiss_pairs.pop()
-        b = swiss_pairs.pop()
-        tup = (a[0],a[1],b[0],b[1])
-        finalist.append(tup)
-    return finalist;
+        first_player = swiss_pairs.pop()
+        second_player = swiss_pairs.pop()
+        new_tuple = (first_player[0],first_player[1],second_player[0],second_player[1])
+        final_list_players.append(new_tuple)
+    return final_list_players;
