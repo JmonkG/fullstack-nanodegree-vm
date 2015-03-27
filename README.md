@@ -1,4 +1,4 @@
-Project # 2 : Tournament Results
+Project # 2 : Tournament Planner
 =============
 
 This project is divided in 3 files:
