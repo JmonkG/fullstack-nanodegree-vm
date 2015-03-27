@@ -116,13 +116,13 @@ def swissPairings():
     final_list_players = [] # the final list of tuples in the desired format
     conectdb = connect()
     cursor = conectdb.cursor()
-    cursor.execute("SELECT * from swiss_pairs;") # uses the SQL view 
+    cursor.execute("SELECT * from swiss_pairs;") # uses the SQL view swiss_pairs to retrieve the list of players in the desired order
     swiss_pairs = cursor.fetchall()  
     cursor.close()
     conectdb.close()
-    while(len(swiss_pairs) != 0):
-        first_player = swiss_pairs.pop()
-        second_player = swiss_pairs.pop()
-        new_tuple = (first_player[0],first_player[1],second_player[0],second_player[1])
+    while(len(swiss_pairs) != 0): #while the list swiss_pass has elements
+        first_player = swiss_pairs.pop() #takes the first player 
+        second_player = swiss_pairs.pop() #takes the second player
+        new_tuple = (first_player[0],first_player[1],second_player[0],second_player[1]) #forms the new tuple to add to the final list
         final_list_players.append(new_tuple)
     return final_list_players;
