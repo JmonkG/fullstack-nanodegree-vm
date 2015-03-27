@@ -6,7 +6,7 @@
 import psycopg2
 import random
 
-random.seed()
+random.seed()                                                                           # generate a seed for randomize the choosing of a player in an odd players list
 
 def connect():
     """Connect to the PostgreSQL database.  Returns a database connection."""
