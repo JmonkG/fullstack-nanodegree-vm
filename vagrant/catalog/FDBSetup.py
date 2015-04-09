@@ -2,7 +2,7 @@ from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///catalog.db'
 db = SQLAlchemy(app)
         
 class User(db.Model):
@@ -40,7 +40,7 @@ class Item(db.Model):
     name = db.Column(db.String(250), nullable = False)
     description = db.Column(db.String(500))
     category_id = db.Column(db.Integer,db.ForeignKey('Category.id'))
-    category = db.relationship('Category')
+    category = db.relationship('Category',backref=db.backref('items',lazy='dynamic'))
     
     def __init__(self,name,description,category):
         self.name = name
