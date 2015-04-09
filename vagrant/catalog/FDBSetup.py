@@ -26,7 +26,7 @@ class Category(db.Model):
     id = db.Column(db.Integer,primary_key = True)
     name = db.Column(db.String(250),nullable = False)
     user_id = db.Column(db.Integer,db.ForeignKey('User.id'))
-    user = db.relationship('User')
+    user = db.relationship('User',backref=db.backref('categories',lazy= 'dynamic'))
     
     def __init__(self,name,user):
         self.name = name

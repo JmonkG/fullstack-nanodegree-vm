@@ -18,8 +18,3 @@ db.session.add(item2)
 db.session.add(item3)
 db.session.add(item4)
 db.session.commit()
-
-
-list_items = Item.query.filter(category.name == cat.name).all()
-for i in list_items:
-    print i.name
