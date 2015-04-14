@@ -1,9 +1,11 @@
-from flask import Flask,render_template,url_for,redirect,request
-app = Flask(__name__)
-
+from flask import Flask,render_template,url_for,redirect,request,flash,jsonify
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Restaurant, Base, MenuItem
+
+app = Flask(__name__)
+app.secret_key='super_super_secret'
+
 engine = create_engine('sqlite:///restaurantmenu.db')
 # Bind the engine to the metadata of the Base class so that the
 # declaratives can be accessed through a DBSession instance
@@ -17,6 +19,24 @@ DBSession = sessionmaker(bind=engine)
 # revert all of them back to the last commit by calling
 # session.rollback()
 session = DBSession()
+
+
+@app.route('/restaurants/JSON')
+def RestaurantJSON():
+    rest = session.query(Restaurant).all()
+    return jsonify(Restaurants=[i.rest_jsonformat for i in rest])
+    
+@app.route('/restaurants/<int:restaurant_id>/JSON')
+def MenusxRestaurantJSON(restaurant_id):
+    menuitems = session.query(MenuItem).filter_by(restaurant_id= restaurant_id).all()
+    return jsonify(ItemsMenu=[i.item_jsonformat for i in menuitems])
+    
+@app.route('/restaurants/<int:restaurant_id>/menu/<int:menu_id>/JSON')
+def MenuITemJSON(restaurant_id,menu_id):
+    item = session.query(MenuItem).filter_by(id= menu_id).one()
+    return jsonify(Item=item.item_jsonformat)
+
+
 @app.route('/')
 @app.route('/restaurants/<int:restaurant_id>/')
 def restaurantMenu(restaurant_id):
@@ -30,6 +50,7 @@ def newMenuItem(restaurant_id):
         newitem = MenuItem(name= request.form['name'],restaurant_id= restaurant_id)
         session.add(newitem)
         session.commit()
+        flash('you created a brand new menuItem')
         return redirect(url_for('restaurantMenu',restaurant_id= restaurant_id))
     else:
         return render_template('newmenuitem.html',restaurant_id= restaurant_id)
@@ -42,6 +63,7 @@ def editMenuItem(restaurant_id, menu_id):
         editedItem = session.query(MenuItem).filter_by(id= menu_id).first()
         editedItem.name = request.form['editname']
         session.commit()
+        flash('you modified the item %s'% editedItem.name)
         return redirect(url_for('restaurantMenu',restaurant_id = restaurant_id))
     else:
         restaurant = session.query(Restaurant).filter_by(id= restaurant_id).one()
@@ -55,6 +77,7 @@ def deleteMenuItem(restaurant_id, menu_id):
     menuitem = session.query(MenuItem).filter_by(id= menu_id).first()
     session.delete(menuitem)
     session.commit()
+    flash('you just deleted the item')
     return redirect(url_for('restaurantMenu',restaurant_id=restaurant_id))    
     
 if __name__ == '__main__':
