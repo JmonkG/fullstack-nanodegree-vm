@@ -27,9 +27,9 @@ class Item(Base):
     category = relationship('Category')
 
 class ItemPict(Base):    
-    __tablename = 'ItemPicture'
+    __tablename__ = 'ItemPicture'
     
-    item_id = Column(Integer,ForeigKey('Item.id'),primary_key = True)
+    item_id = Column(Integer,ForeignKey('Item.id'),primary_key = True)
     item = relationship('Item')
     
 
