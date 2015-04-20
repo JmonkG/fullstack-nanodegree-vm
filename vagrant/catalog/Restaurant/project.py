@@ -2,6 +2,8 @@ from flask import Flask,render_template,url_for,redirect,request,flash,jsonify
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Restaurant, Base, MenuItem
+from flask import session as login_session
+import random,string
 
 app = Flask(__name__)
 app.secret_key='super_super_secret'
@@ -21,6 +23,12 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 
+@app.route('/login')
+def showLogin():
+    state =''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for x in xrange(32))
+    login_session['state'] = state
+    return render_template('login.html')
+    
 @app.route('/restaurants/JSON')
 def RestaurantJSON():
     rest = session.query(Restaurant).all()

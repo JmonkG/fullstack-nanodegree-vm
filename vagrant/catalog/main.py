@@ -19,26 +19,55 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+@app.route('/Items/')
+def Items():
+    items = session.query(Item).all()
+    return render_template('items.html',items=items)
 
 
-
-@app.route('/')
-@app.route('/Item/new/',methods=['GET','POST'])
+@app.route('/Items/new/',methods=['GET','POST'])
 def addItem():
     if request.method == 'POST':
         filename =photos.save(request.files['picture'])
-        newitem = Item(name=request.form['name'],description='whatevs',image_name=filename)
+        newitem = Item(name=request.form['name'],description=request.form['description'],image_name=filename)
         session.add(newitem)
         session.commit()
         return redirect(url_for('show_item',id_item=newitem.id))
     else:
         return render_template('newitem.html')
+    
+@app.route('/')
+@app.route('/Items/edit/<int:id_item>/',methods=['GET','POST'])
+def editItem(id_item):
+    if request.method == 'POST':
+        filename = photos.save(request.files['picture'])
+        name = request.form['name']
+        description = request.form['description']
+        item = session.query(Item).filter_by(id=id_item).one()
+        item.name = name
+        item.description = description
+        item.image_name = filename
+        session.add(item)
+        session.commit()
+        return redirect(url_for('Items'))
+    else:
+        item_edit = session.query(Item).filter_by(id=id_item).one()
+        url = photos.url(item_edit.image_name)
+        return render_template('editItem.html',item=item_edit,url=url)
+    
+  
+@app.route('/Items/delete/<int:id_item>/')
+def deleteItem(id_item):
+    item = session.query(Item).filter_by(id=id_item).one()
+    session.delete(item)
+    session.commit()
+    return redirect('Items')
 
-@app.route('/Item/<int:id_item>/')
+@app.route('/Items/<int:id_item>/')
 def show_item(id_item):
     ex_item = session.query(Item).filter_by(id=id_item).one()
     url = photos.url(ex_item.image_name)
-    return render_template("Create_menu.html",item=ex_item,direc=url)
+    return render_template("showitem.html",item=ex_item,direc=url)
   
 
 if __name__ == '__main__':

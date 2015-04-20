@@ -1,0 +1,23 @@
+<html>
+<body>
+
+<h1>ITEMS</h1>
+
+
+{% for i in items %}
+
+<div>
+
+<p>{{i.name}}</p>
+
+<p>{{i.description}}</p>
+
+<p> <a href="{{ url_for('editItem',id_item=i.id) }}">Edit </a> </p>
+<p> <a href="{{ url_for('deleteItem',id_item=i.id) }}">Delete </a></p>
+</div>
+
+
+{% endfor %}
+</body>
+
+</html>
