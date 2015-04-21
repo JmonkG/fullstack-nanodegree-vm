@@ -9,6 +9,7 @@ from werkzeug import secure_filename
 
 
 app = Flask(__name__)
+#Configuration of Flask Uploads
 app.config['UPLOADED_PHOTOS_DEST']= os.getcwd()+'/images'
 photos = UploadSet('photos',IMAGES)
 configure_uploads(app,photos)
@@ -18,6 +19,44 @@ engine = create_engine('sqlite:///Catalog.db')
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
+
+
+@app.route('/Categories/')
+def categories():
+    categories = session.query(Category).all()
+    return render_template('categories.html',categories=categories)
+
+@app.route('/Categories/new',methods=['GET','POST'])
+def addCategory():
+    if request.method == 'POST':
+        new_category = Item(name=request.form['name'],description=request.form['description'])
+        session.add(new_category)
+        session.commit()
+        return redirect(url_for('categories'))
+    else:
+        return render_template('newcategory.html')
+    
+@app.route('/Categories/edit/<int:id_category>/',methods=['GET','POST'])
+def editCategory(id_category):
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+        category = session.query(Category).filter_by(id=id_category).one()
+        category.name = name
+        category.description = description
+        session.add(category)
+        session.commit()
+        return redirect(url_for('categories'))
+    else:
+        category_edit = session.query(Category).filter_by(id=id_category).one()
+        return render_template('editCategory.html',category = category_edit)
+    
+@app.route('/Categories/delete/<int:id_category>', methods=['GET','POST'])
+def deleteCategory(id_category):
+    category = session.query(Category).filter_by(id=id_category).one()
+    session.delete(category)
+    session.commit()
+    return redirect('Categories')
 
 @app.route('/Items/')
 def Items():

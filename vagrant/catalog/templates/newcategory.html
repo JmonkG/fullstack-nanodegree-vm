@@ -1,0 +1,22 @@
+<html>
+<body>
+<h1>New Category</h1>
+
+<form action="{{url_for('editItem')}}" method = 'POST' enctype="multipart/form-data">
+<div>
+<p>Name:</p>
+<input type='text' size='30' name='name'/>
+</div>
+<div>
+<p>Description:</p>
+<input type='text' size='80' name='description'/>
+</div>
+<p>Picture</p>
+<input type='file' size='50' name='picture'/>
+<div>
+<input type='submit' value='Create'>
+
+</form>
+
+</body>
+</html>
