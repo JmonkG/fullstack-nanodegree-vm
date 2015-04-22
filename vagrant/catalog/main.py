@@ -1,7 +1,7 @@
 import os
 from flask import Flask,render_template,url_for,redirect,request,flash,jsonify
 from flask.ext.uploads import UploadSet,IMAGES,configure_uploads
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine,desc
 from sqlalchemy.orm import sessionmaker
 from db_setup import Base,Category,Item
 from werkzeug import secure_filename
@@ -24,6 +24,7 @@ session = DBSession()
 @app.route('/Categories/')
 def categories():
     categories = session.query(Category).all()
+    select_last_items()
     return render_template('categories.html',categories=categories)
 
 @app.route('/Categories/new',methods=['GET','POST'])
@@ -106,7 +107,16 @@ def show_item(id_item):
     ex_item = session.query(Item).filter_by(id=id_item).one()
     url = photos.url(ex_item.image_name)
     return render_template("showitem.html",item=ex_item,direc=url)
-  
+
+
+def select_last_items():
+    tuples =[]
+    items = session.query(Item).order_by(desc(Item.id)).all()
+    for i in items:
+        category = session.query(Category).filter_by(id=i.category_id).one()
+        tup = (i.name,category.name)
+        tuples.append(tup)
+    print tuples
 
 if __name__ == '__main__':
     app.debug = True
