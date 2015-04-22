@@ -21,8 +21,8 @@ class Category(Base):
     id = Column(Integer,primary_key=True)
     name = Column(String(80),nullable=False)
     description = Column(String(250),nullable=False)
-    user_id = Column(Integer,ForeignKey('User.id'))
-    user = relationship('User')
+    #user_id = Column(Integer,ForeignKey('User.id'))
+    #user = relationship('User')
     
 class Item(Base):
     __tablename__ = 'Item'

@@ -3,17 +3,28 @@
 </head>
 <body>
 
-<h1>{{item.name}}</h1>
+<h1>Categories</h1>
+<p>
+    <a href="{{url_for('addCategory')}}">Create new Category</a>
+</p>
+<div>
 
-
+{% for i in categories %}
 
 <div>
 
-<p>{{item.name}}</p>
+<h1><p>{{i.name}}</p></h1>
 
-<p>{{item.description}}</p>
+<p>{{i.description}}</p>
 
-<p> <img src="{{ direc }}" </p>
+<p> <a href="{{url_for('editCategory',id_category = i.id) }}">Edit </a> </p>
+<p> <a href="{{url_for('deleteCategory',id_category = i.id) }}">Delete </a></p>
+<p> <a href="{{url_for('Items',id_category = i.id) }}">Items </a></p>
+
+</div>
+
+
+{% endfor %}
 
 </div>
 </body>

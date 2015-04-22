@@ -29,7 +29,7 @@ def categories():
 @app.route('/Categories/new',methods=['GET','POST'])
 def addCategory():
     if request.method == 'POST':
-        new_category = Item(name=request.form['name'],description=request.form['description'])
+        new_category = Category(name=request.form['name'],description=request.form['description'])
         session.add(new_category)
         session.commit()
         return redirect(url_for('categories'))
@@ -48,8 +48,8 @@ def editCategory(id_category):
         session.commit()
         return redirect(url_for('categories'))
     else:
-        category_edit = session.query(Category).filter_by(id=id_category).one()
-        return render_template('editCategory.html',category = category_edit)
+        category= session.query(Category).filter_by(id=id_category).one()
+        return render_template('editCategory.html',category=category)
     
 @app.route('/Categories/delete/<int:id_category>', methods=['GET','POST'])
 def deleteCategory(id_category):
@@ -58,26 +58,25 @@ def deleteCategory(id_category):
     session.commit()
     return redirect('Categories')
 
-@app.route('/Items/')
-def Items():
-    items = session.query(Item).all()
-    return render_template('items.html',items=items)
+@app.route('/Categories/<int:id_category>/Items/')
+def Items(id_category):
+    items = session.query(Item).filter_by(category_id=id_category).all()
+    return render_template('items.html',items=items,id_category=id_category)
 
-
-@app.route('/Items/new/',methods=['GET','POST'])
-def addItem():
+@app.route('/Categories/<int:id_category>/Items/new/',methods=['GET','POST'])
+def addItem(id_category):
     if request.method == 'POST':
         filename =photos.save(request.files['picture'])
-        newitem = Item(name=request.form['name'],description=request.form['description'],image_name=filename)
+        newitem = Item(name=request.form['name'],description=request.form['description'],image_name=filename,category_id=id_category)
         session.add(newitem)
         session.commit()
-        return redirect(url_for('show_item',id_item=newitem.id))
+        return redirect(url_for('Items',id_category=id_category))
     else:
-        return render_template('newitem.html')
+        return render_template('newitem.html',id_category=id_category)
     
 @app.route('/')
-@app.route('/Items/edit/<int:id_item>/',methods=['GET','POST'])
-def editItem(id_item):
+@app.route('/Categories/<int:id_category>/Items/edit/<int:id_item>/',methods=['GET','POST'])
+def editItem(id_item,id_category):
     if request.method == 'POST':
         filename = photos.save(request.files['picture'])
         name = request.form['name']
@@ -88,19 +87,19 @@ def editItem(id_item):
         item.image_name = filename
         session.add(item)
         session.commit()
-        return redirect(url_for('Items'))
+        return redirect(url_for('Items',id_category=id_category))
     else:
         item_edit = session.query(Item).filter_by(id=id_item).one()
         url = photos.url(item_edit.image_name)
-        return render_template('editItem.html',item=item_edit,url=url)
+        return render_template('editItem.html',item=item_edit,url=url,id_category=id_category)
     
   
-@app.route('/Items/delete/<int:id_item>/')
-def deleteItem(id_item):
+@app.route('/Categories/<int:id_category>/Items/delete/<int:id_item>/')
+def deleteItem(id_item,id_category):
     item = session.query(Item).filter_by(id=id_item).one()
     session.delete(item)
     session.commit()
-    return redirect('Items')
+    return redirect(url_for('Items',id_category=id_category))
 
 @app.route('/Items/<int:id_item>/')
 def show_item(id_item):

@@ -2,23 +2,17 @@
 <body>
 <h1>Edit Category</h1>
 
-<form action="{{url_for('editItem')}}" method = 'POST' enctype="multipart/form-data">
+<form action="{{url_for('editCategory',id_category=category.id)}}" method = 'POST' enctype="multipart/form-data">
 <div>
 <p>Name:</p>
-<input type='text' size='30' name='name' value="{{item.name}}"/>
+<input type='text' size='30' name='name' value='{{category.name}}'/>
 </div>
 <div>
 <p>Description:</p>
-<input type='text' size='80' name='description' value="{{item.description}}"/>
+<input type='text' size='80' name='description' value='{{category.description}}'/>
 </div>
-<p>Picture</p>
-<input type='file' size='50' name='picture'/>
-<div>
-</div>
-<p>Actual Picture:</p>
-<img src="{{url}}"/>
-<div>
-<input type='submit' value='Create'>
+
+<input type='submit' value='Modificar'>
 
 </form>
 

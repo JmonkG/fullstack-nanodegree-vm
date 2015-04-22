@@ -1,8 +1,8 @@
 <html>
 <body>
 <h1>Edit Item</h1>
-
-<form action="{{url_for('editItem')}}" method = 'POST' enctype="multipart/form-data">
+<div><a href="{{url_for('Items',id_category=id_category)}}">Back without changes</a></div>
+<form action="{{url_for('editItem',id_item=item.id,id_category=id_category)}}" method = 'POST' enctype="multipart/form-data">
 <div>
 <p>Name:</p>
 <input type='text' size='30' name='name' value="{{item.name}}"/>
