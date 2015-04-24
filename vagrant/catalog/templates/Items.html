@@ -3,7 +3,7 @@
 
 <h1>ITEMS</h1>
 
-<div><a href="{{url_for('addItem',id_category=id_category)}}">Crear nuevo Item</a></div>
+<div><a href="{{url_for('addItem',category_name=category_name)}}">Crear nuevo Item</a></div> 
 <div><a href="{{url_for('categories')}}">Back to Categories</a></div>
 {% for i in items %}
 
@@ -13,8 +13,8 @@
 
 <p>{{i.description}}</p>
 
-<p> <a href="{{ url_for('editItem',id_item=i.id,id_category=id_category) }}">Edit </a> </p>
-<p> <a href="{{ url_for('deleteItem',id_item=i.id,id_category=id_category) }}">Delete </a></p>
+<p> <a href="{{ url_for('editItem',item_name=i.name,category_name=category_name) }}">Edit </a> </p>
+<p> <a href="{{ url_for('deleteItem',item_name=i.name,category_name=category_name) }}">Delete </a></p> 
 </div>
 
 
