@@ -1,4 +1,5 @@
 import os
+from collections import OrderedDict
 import sys
 from sqlalchemy import Column,Integer,String,ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
@@ -21,6 +22,17 @@ class Category(Base):
     id = Column(Integer,primary_key=True)
     name = Column(String(80),nullable=False)
     description = Column(String(250),nullable=False)
+    Items = relationship("Item", backref="Category")
+    @property
+    def serialize(self):
+        CatDict ={
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'Items': [i.serialize for i in self.Items],
+        }
+        return CatDict
+       
     #user_id = Column(Integer,ForeignKey('User.id'))
     #user = relationship('User')
     
@@ -33,12 +45,16 @@ class Item(Base):
     image_name= Column(String(250),nullable=False)
     category_id = Column(Integer,ForeignKey('Category.id'))
     category = relationship('Category')
+    @property
+    def serialize(self):
+        ItemsDict = {
+            'name':self.name,
+            'id': self.id,
+            'description': self.description,
+            'image':self.image_name,
+        }
+        return ItemsDict
 
-'''class ItemPict(Base,Image):    
-    __tablename__ = 'ItemPicture'
-    
-    item_id = Column(Integer,ForeignKey('Item.id'),primary_key = True)
-    item = relationship('Item')'''
     
 
 engine = create_engine('sqlite:///Catalog.db')

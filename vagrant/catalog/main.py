@@ -20,11 +20,21 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+app.config["JSON_SORT_KEYS"] = False
+
+
+@app.route('/catalog/catalog.json')
+def categoriesJSON():
+ Categories = session.query(Category).all()
+ for i in Categories:
+    items = session.query(Item).filter_by(category_id= i.id).all()
+    i.Items = items
+ return jsonify(Categories=[a.serialize for a in Categories])
+    
 
 @app.route('/catalog/')
 def categories():
     categories = session.query(Category).all()
-    select_last_items()
     return render_template('categories.html',categories=categories)
 
 @app.route('/catalog/<category_name>/Items/')
@@ -51,13 +61,14 @@ def addItem(category_name):
 def editItem(item_name,category_name):
     if request.method == 'POST':
         cat = session.query(Category).filter_by(name=category_name).one()
-        filename = photos.save(request.files['picture'])
         name = request.form['name']
         description = request.form['description']
         item = session.query(Item).filter(and_(Item.name==item_name,Item.category_id==cat.id)).one()
         item.name = name
         item.description = description
-        item.image_name = filename
+        if request.files['picture']:
+            filename = photos.save(request.files['picture'])
+            item.image_name = filename
         session.add(item)
         session.commit()
         return redirect(url_for('Items',category_name=category_name))
@@ -83,7 +94,7 @@ def select_last_items():
         category = session.query(Category).filter_by(id=i.category_id).one()
         tup = (i.name,category.name)
         tuples.append(tup)
-    print tuples
+    return tuples
 
 if __name__ == '__main__':
     app.debug = True
