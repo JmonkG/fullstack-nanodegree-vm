@@ -1,6 +1,8 @@
 import os
-from flask import Flask,render_template,url_for,redirect,request,flash,jsonify
+from lxml import etree
+from flask import Flask,render_template,url_for,redirect,request,flash,jsonify,Response
 from flask.ext.uploads import UploadSet,IMAGES,configure_uploads
+from flask.ext.xmlrpc import XMLRPCHandler
 from sqlalchemy import create_engine,desc,and_
 from sqlalchemy.orm import sessionmaker
 from db_setup import Base,Category,Item
@@ -14,6 +16,7 @@ app.config['UPLOADED_PHOTOS_DEST']= os.getcwd()+'/images'
 photos = UploadSet('photos',IMAGES)
 configure_uploads(app,photos)
 
+
 #OPEN DB PARAMETERS
 engine = create_engine('sqlite:///Catalog.db')
 Base.metadata.bind = engine
@@ -23,14 +26,25 @@ session = DBSession()
 app.config["JSON_SORT_KEYS"] = False
 
 
-@app.route('/catalog/catalog.json')
-def categoriesJSON():
- Categories = session.query(Category).all()
- for i in Categories:
+
+
+@app.route('/catalog/sitemap.xml',methods=['GET'])
+def sitemapXML():
+ Catalog = session.query(Category).all()
+ for i in Catalog:
     items = session.query(Item).filter_by(category_id= i.id).all()
     i.Items = items
- return jsonify(Categories=[a.serialize for a in Categories])
-    
+ sitemap_xml = render_template('sitemap.xml',Categories=Catalog)
+ resp = Response(sitemap_xml,status=200,mimetype='text/xml')
+ return resp
+ 
+@app.route('/catalog/catalog.json',methods=['GET'])
+def CatalogJSON():
+ Catalog = session.query(Category).all()
+ for i in Catalog:
+    items = session.query(Item).filter_by(category_id= i.id).all()
+    i.Items = items
+ return jsonify(Catalog=[a.serialize for a in Catalog])    
 
 @app.route('/catalog/')
 def categories():
