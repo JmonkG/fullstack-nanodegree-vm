@@ -1,5 +1,5 @@
 import os
-from collections import OrderedDict
+import collections
 import sys
 from sqlalchemy import Column,Integer,String,ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
@@ -25,12 +25,11 @@ class Category(Base):
     Items = relationship("Item", backref="Category")
     @property
     def serialize(self):
-        CatDict ={
-            'id': self.id,
-            'name': self.name,
-            'description': self.description,
-            'Items': [i.serialize for i in self.Items],
-        }
+        CatDict = collections.OrderedDict()
+        CatDict['id'] = self.id
+        CatDict['name'] = self.name
+        CatDict['description'] = self.description
+        CatDict['Items'] = [i.serialize for i in self.Items]
         return CatDict
        
     #user_id = Column(Integer,ForeignKey('User.id'))
@@ -47,12 +46,11 @@ class Item(Base):
     category = relationship('Category')
     @property
     def serialize(self):
-        ItemsDict = {
-            'name':self.name,
-            'id': self.id,
-            'description': self.description,
-            'image':self.image_name,
-        }
+        ItemsDict = collections.OrderedDict()
+        ItemsDict['id'] = self.id
+        ItemsDict['name'] = self.name
+        ItemsDict['description'] = self.description
+        ItemsDict['image'] = self.image_name
         return ItemsDict
 
     

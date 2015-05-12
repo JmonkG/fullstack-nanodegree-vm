@@ -29,13 +29,13 @@ app.config["JSON_SORT_KEYS"] = False
 
 
 @app.route('/catalog/catalog.xml',methods=['GET'])
-def sitemapXML():
+def CatalogXML():
  Catalog = session.query(Category).all()
  for i in Catalog:
     items = session.query(Item).filter_by(category_id= i.id).all()
     i.Items = items
- sitemap_xml = render_template('sitemap.xml',Categories=Catalog)
- resp = Response(sitemap_xml,status=200,mimetype='text/xml')
+ catalog_xml = render_template('catalog.xml',Categories=Catalog)
+ resp = Response(catalog_xml,status=200,mimetype='text/xml')
  return resp
  
 @app.route('/catalog/catalog.json',methods=['GET'])
