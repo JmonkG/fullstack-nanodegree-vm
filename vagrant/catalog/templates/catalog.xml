@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Catalog>
+{% for cat in Categories%}
+    <Category>
+            <id>{{cat.id}}</id>
+            <name>{{cat.name}}</name>
+            <description>{{cat.description}}</description>
+            <Items>
+             {% for i in cat.Items %}
+                <id>{{i.id}}</id>
+                <name>{{i.name}}</name>
+                <description>{{i.description}}</description>
+                <image_name>{{i.image_name}}</image_name>
+             {% endfor %}   
+            </Items>
+    </Category>
+{% endfor %}
+</Catalog>
