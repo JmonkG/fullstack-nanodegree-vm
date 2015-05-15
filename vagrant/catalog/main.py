@@ -20,7 +20,7 @@ import requests
 
 CLIENT_ID = json.loads(
     open('client_secret.json', 'r').read())['web']['client_id']
-#APPLICATION_NAME = "Restaurant Menu Application"
+APPLICATION_NAME = "Catalog Application"
 
 app = Flask(__name__)
 #Configuration of Flask Uploads
@@ -49,7 +49,7 @@ def showLogin():
     # return "The current session state is %s" % login_session['state']
     return render_template('login.html', STATE=state)
 
-
+@app.route('/')
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     # Validate state token
@@ -107,7 +107,7 @@ def gconnect():
         return response
 
     # Store the access token in the session for later use.
-    login_session['credentials'] = credentials
+    login_session['credentials'] = credentials.access_token #IMPORTANT CHANGE
     login_session['gplus_id'] = gplus_id
 
     # Get user info
@@ -182,7 +182,7 @@ def addItem(category_name):
         cat = session.query(Category).filter_by(name=category_name).one()
         return render_template('newitem.html',id_category=cat.id,category_name=category_name)
     
-@app.route('/')
+
 @app.route('/catalog/<category_name>/Items/edit/<item_name>/',methods=['GET','POST'])
 def editItem(item_name,category_name):
     if request.method == 'POST':
