@@ -5,7 +5,7 @@ from flask.ext.uploads import UploadSet,IMAGES,configure_uploads
 from flask.ext.xmlrpc import XMLRPCHandler
 from sqlalchemy import create_engine,desc,and_
 from sqlalchemy.orm import sessionmaker
-from db_setup import Base,Category,Item
+from db_setup import Base,User,Category,Item
 #from werkzeug import secure_filename
 
 #for OAUTH2 authorization
@@ -13,7 +13,7 @@ from flask import session as login_session
 import random
 import string
 from oauth2client.client import flow_from_clientsecrets
-from oauth2client.client import FlowExchangeError
+from oauth2client.client import FlowExchangeError,AccessTokenCredentials
 import httplib2
 import json
 import requests
@@ -42,9 +42,7 @@ app.config['SECRET_KEY'] = 'super secret key'
 
 @app.route('/login')
 def showLogin():
-    state = ''.join(random.choice(string.ascii_uppercase + string.digits)
-                    for x in xrange(32))
-    print 'El estado es:' + state
+    state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
     login_session['state'] = state
     # return "The current session state is %s" % login_session['state']
     return render_template('login.html', STATE=state)
@@ -72,6 +70,7 @@ def gconnect():
         return response
 
     # Check that the access token is valid.
+    login_session['credentials']= credentials.access_token
     access_token = credentials.access_token
     url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
            % access_token)
@@ -122,10 +121,12 @@ def gconnect():
     login_session['email'] = data['email']
 
     # see if user exists, if it doesn't make a new one
-    #user_id = getUserID(data["email"])
+    #user_id = session.query(User).filter_by(email = data["email"]).one()
     #if not user_id:
-    #    user_id = createUser(login_session)
-    #login_session['user_id'] = user_id
+    #        newUser = User(name=login_session['username'], email=login_session['email'], picture=login_session['picture'])
+    #        session.add(newUser)
+    #        session.commit()
+    #login_session['user_id'] = newUser.id
 
     output = ''
     output += '<h1>Welcome, '
@@ -141,18 +142,16 @@ def gconnect():
 @app.route('/gdisconnect')
 def gdisconnect():
         # Only disconnect a connected user.
-    credentials = login_session.get('credentials')
+    credentials = login_session['credentials']
     if credentials is None:
         response = make_response(
             json.dumps('Current user not connected.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
-    access_token = credentials.access_token
-    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % credentials
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
-
-    if result['status'] == '200':
+    if result['status']=='200':
         # Reset the user's sesson.
         del login_session['credentials']
         del login_session['gplus_id']
@@ -180,14 +179,14 @@ def CatalogXML():
  catalog_xml = render_template('catalog.xml',Categories=Catalog)
  resp = Response(catalog_xml,status=200,mimetype='text/xml')
  return resp
- 
+
 @app.route('/catalog/catalog.json',methods=['GET'])
 def CatalogJSON():
  Catalog = session.query(Category).all()
  for i in Catalog:
     items = session.query(Item).filter_by(category_id= i.id).all()
     i.Items = items
- return jsonify(Catalog=[a.serialize for a in Catalog])    
+ return jsonify(Catalog=[a.serialize for a in Catalog])
 
 @app.route('/catalog/')
 def categories():
@@ -212,7 +211,7 @@ def addItem(category_name):
     else:
         cat = session.query(Category).filter_by(name=category_name).one()
         return render_template('newitem.html',id_category=cat.id,category_name=category_name)
-    
+
 
 @app.route('/catalog/<category_name>/Items/edit/<item_name>/',methods=['GET','POST'])
 def editItem(item_name,category_name):
@@ -234,8 +233,8 @@ def editItem(item_name,category_name):
         item_edit = session.query(Item).filter_by(name=item_name).one()
         url = photos.url(item_edit.image_name)
         return render_template('editItem.html',item=item_edit,url=url,category_name=category_name)
-    
-  
+
+
 @app.route('/catalog/<category_name>/Items/delete/<item_name>/')
 def deleteItem(item_name,category_name):
     cat = session.query(Category).filter_by(name=category_name).one()
@@ -256,4 +255,3 @@ def select_last_items():
 if __name__ == '__main__':
     app.debug = True
     app.run(host = '127.0.0.1',port = 8000)
-
